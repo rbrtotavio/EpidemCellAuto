@@ -13,6 +13,7 @@ O projeto está organizado na seguinte estrutura de diretórios para garantir a 
 ```
 .
 ├── data/                  # Armazena dados de entrada e saída
+    ├── processed/         # Amostras de simulações
 │   ├── raw/               # Parâmetros de simulação (parameters.json)
 │   └── results/           # Resultados de cada simulação (.csv, .gif, .json)
 ├── notebooks/             # Ambiente de trabalho principal (analysis.ipynb)
@@ -29,10 +30,20 @@ O projeto está organizado na seguinte estrutura de diretórios para garantir a 
 
 Para garantir a replicabilidade dos experimentos, o projeto utiliza um ambiente virtual e o controle explícito da aleatoriedade.
 
-1.  **Instalar as Dependências**: As bibliotecas necessárias estão listadas no arquivo `requirements.txt`.
+1.  **Configurar o Ambiente Virtual**: Recomenda-se a criação de um ambiente virtual para isolar as dependências do projeto, como detalhado em `requirements.txt`.
+    ```bash
+    python -m venv venv
+    ```
+    Ative o ambiente virtual:
+    - No Windows: `venv\Scripts\activate`
+    - No macOS/Linux: `source venv/bin/activate`
+
+2.  **Instalar as Dependências**: As bibliotecas necessárias estão listadas no arquivo `requirements.txt`.
     ```bash
     pip install -r requirements.txt
     ```
+
+3.  **Controle de Versão**: O arquivo `.gitignore` foi configurado para ignorar arquivos gerados e de ambiente, garantindo um repositório limpo e focado no código-fonte.
 
 ## Uso e Análise
 

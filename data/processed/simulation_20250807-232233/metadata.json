@@ -1,0 +1,15 @@
+{
+    "simulation_parameters": {
+        "grid_size": 100,
+        "initial_infected": 10,
+        "infection_rate": 0.3,
+        "recovery_time": 14,
+        "immunity_loss_rate": 0.005,
+        "population_density": 0.85,
+        "movement_rate": 0.2,
+        "exposed_time": 5,
+        "num_steps": 365,
+        "random_seed": 42
+    },
+    "box_counting_dimension": 1.3427045189202278
+}
