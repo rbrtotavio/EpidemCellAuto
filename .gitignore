@@ -1,3 +1,6 @@
-.git
 .gitignore
 venv
+data/results/*
+src/__pycache__
+*.pyc
+.ipynb_checkpoints/

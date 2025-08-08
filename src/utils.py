@@ -6,42 +6,43 @@ import pandas as pd
 from matplotlib.colors import ListedColormap, BoundaryNorm
 import matplotlib.patches as mpatches
 
-from model import SUSCETIVEL, INFECTADO, RECUPERADO, VAZIO, ESTADOS, ESTADO_MAPA_CORES
+from model import SUSCETIVEL, INFECTADO, RECUPERADO, VAZIO, ESTADOS, ESTADO_MAPA_CORES, EXPOSTO
 
-def plot_sir_curves(df_counts, output_path, total_pop=None):
+def plot_seir_curves(df_counts, output_path, total_pop):
     """
-    Plota e salva as curvas de Suscetível, Infectado e Recuperado,
-    usando as cores definidas no modelo.
+    Plota e salva as curvas de Suscetível, Exposto, Infectado e Recuperado,
+    mantendo a escala do eixo Y consistente.
     """
     os.makedirs(output_path, exist_ok=True)
 
     plt.figure(figsize=(10, 6))
     
-    if total_pop:
-        df_counts = df_counts / total_pop
-        ylabel = 'Fração da População'
-    else:
-        ylabel = 'Contagem da População'
-        
-    plt.plot(df_counts['susceptible'], label='Suscetível', color=ESTADO_MAPA_CORES[SUSCETIVEL], linewidth=2)
-    plt.plot(df_counts['infected'], label='Infectado', color=ESTADO_MAPA_CORES[INFECTADO], linewidth=2)
-    plt.plot(df_counts['recovered'], label='Recuperado', color=ESTADO_MAPA_CORES[RECUPERADO], linewidth=2)
+    df_fractions = df_counts.copy()
+    df_fractions = df_fractions / total_pop
     
-    plt.title('Dinâmica da Epidemia (SIRS)')
+    plt.plot(df_fractions['susceptible'], label='Suscetível', color=ESTADO_MAPA_CORES[SUSCETIVEL], linewidth=2)
+    plt.plot(df_fractions['exposed'], label='Exposto', color=ESTADO_MAPA_CORES[EXPOSTO], linewidth=2)
+    plt.plot(df_fractions['infected'], label='Infectado', color=ESTADO_MAPA_CORES[INFECTADO], linewidth=2)
+    plt.plot(df_fractions['recovered'], label='Recuperado', color=ESTADO_MAPA_CORES[RECUPERADO], linewidth=2)
+    
+    plt.ylim(0, 1.0)
+    
+    plt.title('Dinâmica da Epidemia (SEIRS)')
     plt.xlabel('Passos de Tempo')
-    plt.ylabel(ylabel)
+    plt.ylabel('Fração da População')
     
-    # Cria uma legenda com os nomes e cores dos estados
     patches = [
         mpatches.Patch(color=ESTADO_MAPA_CORES[SUSCETIVEL], label='Suscetível'),
+        mpatches.Patch(color=ESTADO_MAPA_CORES[EXPOSTO], label='Exposto'),
         mpatches.Patch(color=ESTADO_MAPA_CORES[INFECTADO], label='Infectado'),
         mpatches.Patch(color=ESTADO_MAPA_CORES[RECUPERADO], label='Recuperado')
     ]
     plt.legend(handles=patches)
     
     plt.grid(True)
-    plt.savefig(os.path.join(output_path, "sir_curves.png"))
+    plt.savefig(os.path.join(output_path, "seir_curves.png"))
     plt.close()
+
 
 def save_grid_animation(history, output_path):
     """
@@ -49,18 +50,17 @@ def save_grid_animation(history, output_path):
     """
     os.makedirs(output_path, exist_ok=True)
 
-    # Define o mapa de cores e a norma para os estados discretos
-    cmap_colors = [ESTADO_MAPA_CORES[SUSCETIVEL], ESTADO_MAPA_CORES[INFECTADO], ESTADO_MAPA_CORES[RECUPERADO], ESTADO_MAPA_CORES[VAZIO]]
+    cmap_colors = [ESTADO_MAPA_CORES[SUSCETIVEL], ESTADO_MAPA_CORES[EXPOSTO], ESTADO_MAPA_CORES[INFECTADO], ESTADO_MAPA_CORES[RECUPERADO], ESTADO_MAPA_CORES[VAZIO]]
     cmap = ListedColormap(cmap_colors)
     norm = BoundaryNorm(ESTADOS + [VAZIO + 1], cmap.N)
     
-    fig, ax = plt.subplots(figsize=(7, 6))
+    fig, ax = plt.subplots(figsize=(9, 6))
     
     img = ax.imshow(history[0], cmap=cmap, norm=norm)
     
-    # Adiciona a legenda manual
     patches = [
         mpatches.Patch(color=ESTADO_MAPA_CORES[SUSCETIVEL], label='Suscetível'),
+        mpatches.Patch(color=ESTADO_MAPA_CORES[EXPOSTO], label='Exposto'),
         mpatches.Patch(color=ESTADO_MAPA_CORES[INFECTADO], label='Infectado'),
         mpatches.Patch(color=ESTADO_MAPA_CORES[RECUPERADO], label='Recuperado'),
         mpatches.Patch(color=ESTADO_MAPA_CORES[VAZIO], label='Vazio')
@@ -75,6 +75,7 @@ def save_grid_animation(history, output_path):
     anim = FuncAnimation(fig, update, frames=len(history), interval=50, blit=True)
     anim.save(os.path.join(output_path, 'simulation.gif'), writer='pillow')
     plt.close(fig)
+
 
 def calculate_box_counting_dimension(grid, thresholds=[1, 2, 4, 8, 16]):
     """

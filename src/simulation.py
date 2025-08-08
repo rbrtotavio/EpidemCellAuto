@@ -1,8 +1,9 @@
+import os
 import numpy as np
 import pandas as pd
 import json
-from model import EpidemiaCA, ESTADOS, SUSCETIVEL, INFECTADO, RECUPERADO
-from utils import plot_sir_curves, save_grid_animation
+from model import EpidemiaCA, SUSCETIVEL, EXPOSTO, INFECTADO, RECUPERADO
+from utils import plot_seir_curves, save_grid_animation
 
 def load_parameters(filepath):
     """
@@ -10,29 +11,39 @@ def load_parameters(filepath):
     """
     with open(filepath, 'r') as f:
         return json.load(f)
+    
+def save_metadata_to_json(simulation_id, params, box_counting_dim, output_dir):
+    """
+    Salva os parâmetros da simulação e a dimensão de box-counting
+    em um arquivo JSON.
+    """
+    results_path = os.path.join(output_dir, f"simulation_{simulation_id}")
+    metadata = {
+        "simulation_parameters": params,
+        "box_counting_dimension": box_counting_dim
+    }
+    with open(os.path.join(results_path, "metadata.json"), 'w') as f:
+        json.dump(metadata, f, indent=4)
 
 def run_simulation(params):
-    """
-    Executa a simulação completa com os parâmetros fornecidos.
-    """
+    random_seed = params['random_seed']
+    np.random.seed(random_seed)
+    
     size = params['grid_size']
     initial_infected = params['initial_infected']
     inf_rate = params['infection_rate']
     rec_time = params['recovery_time']
     imm_loss_rate = params.get('immunity_loss_rate', 0.0)
     num_steps = params['num_steps']
-    
-    # NOVOS PARÂMETROS
     pop_density = params['population_density']
     move_rate = params['movement_rate']
+    exposed_time = params['exposed_time']
     
-    # A chamada ao construtor agora inclui os novos parâmetros
-    model = EpidemiaCA(size, inf_rate, rec_time, imm_loss_rate, pop_density, move_rate)
-    
+    model = EpidemiaCA(size, inf_rate, rec_time, exposed_time, imm_loss_rate, pop_density, move_rate)
     model.initialize_random_infection(initial_infected)
     
     history = []
-    state_counts = {'susceptible': [], 'infected': [], 'recovered': []}
+    state_counts = {'susceptible': [], 'exposed': [], 'infected': [], 'recovered': []}
     
     for step in range(num_steps):
         model.step()
@@ -40,29 +51,37 @@ def run_simulation(params):
         
         counts = model.get_state_counts()
         state_counts['susceptible'].append(counts[SUSCETIVEL])
+        state_counts['exposed'].append(counts[EXPOSTO])
         state_counts['infected'].append(counts[INFECTADO])
         state_counts['recovered'].append(counts[RECUPERADO])
             
     return history, state_counts
 
-def save_results(simulation_id, history, state_counts, output_dir="data/results"):
+def save_results(simulation_id, history, state_counts, params, box_counting_dim, output_dir="data/results"):
     """
-    Salva os resultados da simulação em arquivos CSV e imagens.
+    Salva os resultados da simulação em arquivos CSV e imagens,
+    adaptado para o modelo SEIR.
     """
-    import os
     results_path = os.path.join(output_dir, f"simulation_{simulation_id}")
     os.makedirs(results_path, exist_ok=True)
     
-    # Salva os dados brutos da contagem de estados
-    df_counts = pd.DataFrame(state_counts)
-    df_counts.rename(columns={SUSCETIVEL: 'susceptible', INFECTADO: 'infected', RECUPERADO: 'recovered'}, inplace=True)
-    df_counts.to_csv(os.path.join(results_path, "data.csv"), index=False)
+    save_metadata_to_json(simulation_id, params, box_counting_dim, output_dir)
     
-    # Salva a grade final
+    df_counts = pd.DataFrame(state_counts)
+    
+    total_pop = params['grid_size'] * params['grid_size']
+    plot_seir_curves(df_counts, results_path, total_pop)
+    
+    df_counts.rename(columns={
+        SUSCETIVEL: 'susceptible',
+        EXPOSTO: 'exposed',
+        INFECTADO: 'infected',
+        RECUPERADO: 'recovered'
+    }, inplace=True)
+    df_counts.to_csv(os.path.join(results_path, "data.csv"), index=False)
+
     np.save(os.path.join(results_path, "final_grid.npy"), history[-1])
     
     print(f"Resultados da simulação {simulation_id} salvos em {results_path}")
     
-    # Gera e salva as visualizações
-    plot_sir_curves(df_counts, results_path)
     save_grid_animation(history, results_path)

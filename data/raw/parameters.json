@@ -3,8 +3,10 @@
   "initial_infected": 10,
   "infection_rate": 0.3,
   "recovery_time": 14,
+  "exposed_time": 5,
   "immunity_loss_rate": 0.005,
   "num_steps": 365,
   "population_density": 0.7,
-  "movement_rate": 0.2
+  "movement_rate": 0.2 ,
+  "random_seed": 42
 }
