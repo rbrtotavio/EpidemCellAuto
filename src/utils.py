@@ -7,6 +7,7 @@ from matplotlib.colors import ListedColormap, BoundaryNorm
 import matplotlib.patches as mpatches
 
 from model import SUSCETIVEL, INFECTADO, RECUPERADO, VAZIO, ESTADOS, ESTADO_MAPA_CORES, EXPOSTO
+from simulation import load_parameters, run_simulation
 
 def plot_seir_curves(df_counts, output_path, total_pop):
     """
@@ -106,3 +107,55 @@ def calculate_box_counting_dimension(grid, thresholds=[1, 2, 4, 8, 16]):
         return d
     else:
         return 0
+    
+def analyze_parameter_influence(parameter_name, values_to_test, num_steps=365):
+    """
+    Analisa a influência de um único parâmetro na dimensão de box-counting.
+
+    Args:
+        parameter_name (str): O nome do parâmetro a ser testado.
+        values_to_test (list): Uma lista de valores para o parâmetro.
+        num_steps (int): O número de passos para cada simulação.
+
+    Returns:
+        tuple: Uma tupla contendo a lista dos valores testados e os resultados da dimensão.
+    """
+    results = []
+    base_params = load_parameters('../data/raw/parameters.json')
+
+    base_params['random_seed'] = 42
+
+    print(f"Analisando a influência do parâmetro: {parameter_name}")
+    
+    for value in values_to_test:
+        params = base_params.copy()
+        params[parameter_name] = value
+        
+        print(f"  > Executando simulação com {parameter_name}={value}...")
+        history, state_counts = run_simulation(params)
+        
+        df_counts = pd.DataFrame(state_counts)
+        peak_time = df_counts['infected'].idxmax()
+        grid_at_peak = history[peak_time]
+        
+        dim = calculate_box_counting_dimension(grid_at_peak)
+        results.append(dim)
+        
+    return values_to_test, results
+
+def plot_influence_results(param_values, dim_values, param_name):
+    """
+    Plota os resultados da análise de sensibilidade, marcando o pico com uma linha horizontal.
+    """
+    plt.figure(figsize=(10, 6))
+    plt.plot(param_values, dim_values, marker='o', linestyle='-')
+    
+    max_dim = max(dim_values)
+    
+    plt.axhline(y=max_dim, color='black', linestyle='--')
+    
+    plt.title(f'Influência de "{param_name}" na Dimensão de Box-Counting')
+    plt.xlabel(param_name)
+    plt.ylabel('Dimensão de Box-Counting')
+    plt.grid(True)
+    plt.show()
