@@ -1,5 +1,9 @@
 # Modelagem de Epidemias: Uma Abordagem com Autômatos Celulares e Análise Fractal
 
+[![📄 Scientific Report](https://img.shields.io/badge/📄_Scientific_Report-Disponível-blue?style=for-the-badge)](https://github.com/rbrtotavio/EpidemCellAuto/tree/master/paper)
+
+> **Nota:** O **artigo científico** completo deste projeto, no formato *Scientific Reports*, está disponível na pasta [`paper/`](https://github.com/rbrtotavio/EpidemCellAuto/tree/master/paper).
+
 ## Resumo
 
 Este projeto de pesquisa acadêmica explora a dinâmica de epidemias utilizando um modelo de autômatos celulares (CA) baseado em agentes. Diferentemente de modelos compartimentais clássicos que assumem uma mistura populacional homogênea, esta abordagem simula a propagação de uma doença (modelo SEIR) em uma grade esparsa e dinâmica. Os indivíduos, que representam a população ativa, podem se mover de forma estocástica, permitindo a análise de interações locais e do impacto do distanciamento social.
@@ -9,6 +13,7 @@ A principal contribuição deste trabalho é a análise quantitativa da complexi
 ## Estrutura do Projeto
 
 O projeto está organizado na seguinte estrutura de diretórios para garantir a modularidade e a replicabilidade dos experimentos:
+
 
 ```
 .
@@ -26,11 +31,12 @@ O projeto está organizado na seguinte estrutura de diretórios para garantir a 
 ├── .gitignore             # Arquivo de regras para o Git
 └── requirements.txt       # Lista de dependências do Python
 ```
+
 ## Replicabilidade e Dependências
 
 Para garantir a replicabilidade dos experimentos, o projeto utiliza um ambiente virtual e o controle explícito da aleatoriedade.
 
-1.  **Configurar o Ambiente Virtual**: Recomenda-se a criação de um ambiente virtual para isolar as dependências do projeto, como detalhado em `requirements.txt`.
+1. **Configurar o Ambiente Virtual**: Recomenda-se a criação de um ambiente virtual para isolar as dependências do projeto, como detalhado em `requirements.txt`.
     ```bash
     python -m venv venv
     ```
@@ -38,19 +44,17 @@ Para garantir a replicabilidade dos experimentos, o projeto utiliza um ambiente 
     - No Windows: `venv\Scripts\activate`
     - No macOS/Linux: `source venv/bin/activate`
 
-2.  **Instalar as Dependências**: As bibliotecas necessárias estão listadas no arquivo `requirements.txt`.
+2. **Instalar as Dependências**: As bibliotecas necessárias estão listadas no arquivo `requirements.txt`.
     ```bash
     pip install -r requirements.txt
     ```
-
-3.  **Controle de Versão**: O arquivo `.gitignore` foi configurado para ignorar arquivos gerados e de ambiente, garantindo um repositório limpo e focado no código-fonte.
 
 ## Uso e Análise
 
 A interface principal do projeto é o `Jupyter Notebook`, localizado em `notebooks/analysis.ipynb`.
 
-1.  **Executar a Simulação**: Abra o notebook e use os widgets interativos para ajustar os parâmetros do modelo. Ao clicar no botão "Iniciar Simulação", o notebook executará a simulação e exibirá os resultados.
-2.  **Análise de Resultados**: Após cada execução, os resultados são salvos de forma permanente no diretório `data/results/` com um identificador único. Os dados incluem um arquivo `.csv` com as contagens de estados e um arquivo `.json` com os parâmetros exatos e o valor da dimensão de box-counting. A animação da grade é salva como um arquivo `.gif`.
+1. **Executar a Simulação**: Abra o notebook e use os widgets interativos para ajustar os parâmetros do modelo. Ao clicar no botão "Iniciar Simulação", o notebook executará a simulação e exibirá os resultados.
+2. **Análise de Resultados**: Após cada execução, os resultados são salvos de forma permanente no diretório `data/results/` com um identificador único. Os dados incluem um arquivo `.csv` com as contagens de estados e um arquivo `.json` com os parâmetros exatos e o valor da dimensão de box-counting. A animação da grade é salva como um arquivo `.gif`.
 
 ## Parâmetros-Chave do Modelo
 
@@ -62,4 +66,5 @@ O modelo permite a exploração de múltiplos cenários através dos seguintes p
 * `random_seed`: Valor inicial para o gerador de números aleatórios, garantindo a replicabilidade dos experimentos.
 
 ---
+
 **Licença:** Este projeto é distribuído sob a Licença MIT.
